@@ -3,17 +3,27 @@ from django.shortcuts import render
 # Create your views here.
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
+from django.http import HttpRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from django.contrib.auth import authenticate, login
-
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from django.http import HttpResponse
+import datetime
 
 from .models import Choice, Question
 
 
-class IndexView(generic.ListView):
+def index(request):
+    now = datetime.datetime.now()
+    html = "<html><body>It is now %s.</body></html>" % now
+    return HttpResponse(html)
+
+class PollsView(generic.ListView):
     template_name = 'polls/index.html'
     context_object_name = 'latest_question_list'
 
