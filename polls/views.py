@@ -29,9 +29,7 @@ class IndexView(generic.ListView):
 class DetailView(generic.DetailView):
     model = Question
     template_name = 'polls/detail.html'
-
-    class DetailView(generic.DetailView):
-        def get_queryset(self):
+    def get_queryset(self):
             """
             Excludes any questions that aren't published yet.
             """
