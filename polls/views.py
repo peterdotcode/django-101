@@ -24,7 +24,7 @@ def index(request):
     return HttpResponse(html)
 
 class PollsView(generic.ListView):
-    template_name = 'polls/index.html'
+    template_name = 'polls/polls.html'
     context_object_name = 'latest_question_list'
 
     def get_queryset(self):

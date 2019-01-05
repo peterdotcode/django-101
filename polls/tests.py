@@ -62,7 +62,7 @@ class QuestionIndexViewTests(TestCase):
         index page.
         """
         create_question(question_text="Past question.", days=-30)
-        response = self.client.get(reverse('polls:index'))
+        response = self.client.get(reverse('polls:polls'))
         self.assertQuerysetEqual(
             response.context['latest_question_list'],
             ['<Question: Past question.>']
