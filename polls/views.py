@@ -14,17 +14,13 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.http import HttpResponse
 import datetime
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Choice, Question
 
-'''
-def index(request):
-    return render(request, 'polls/index.html')
-'''
-
-class PollsView(generic.ListView):
+class PollsView(LoginRequiredMixin, generic.ListView):
     template_name = 'polls/polls.html'
     context_object_name = 'latest_question_list'
+    login_url = '/login/'
 
     def get_queryset(self):
         """
@@ -35,7 +31,7 @@ class PollsView(generic.ListView):
             pub_date__lte=timezone.now()
         ).order_by('-pub_date')[:5]
 
-class DetailView(generic.DetailView):
+class DetailView(LoginRequiredMixin,generic.DetailView):
     model = Question
     template_name = 'polls/detail.html'
     def get_queryset(self):
@@ -44,7 +40,7 @@ class DetailView(generic.DetailView):
             """
             return Question.objects.filter(pub_date__lte=timezone.now())
 
-class ResultsView(generic.DetailView):
+class ResultsView(LoginRequiredMixin,generic.DetailView):
     model = Question
     template_name = 'polls/results.html'
 
