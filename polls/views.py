@@ -11,10 +11,11 @@ from django.utils import timezone
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
 from django.http import HttpResponse
 import datetime
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+
 from .models import Choice, Question
 
 class PollsView(LoginRequiredMixin, generic.ListView):
@@ -33,6 +34,7 @@ class PollsView(LoginRequiredMixin, generic.ListView):
 
 class DetailView(LoginRequiredMixin,generic.DetailView):
     model = Question
+    login_url = '/login/'
     template_name = 'polls/detail.html'
     def get_queryset(self):
             """
@@ -40,12 +42,14 @@ class DetailView(LoginRequiredMixin,generic.DetailView):
             """
             return Question.objects.filter(pub_date__lte=timezone.now())
 
-class ResultsView(LoginRequiredMixin,generic.DetailView):
+
+class ResultsView(generic.DetailView):
+    login_url = '/login/'
     model = Question
     template_name = 'polls/results.html'
 
 
-
+@login_required
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
     try:
