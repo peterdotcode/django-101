@@ -5,6 +5,9 @@ from django.utils import timezone
 
 from .models import Question
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.contrib.auth import get_user_model
 
 def create_question(question_text, days):
     """
@@ -47,20 +50,40 @@ class QuestionModelTests(TestCase):
 
 
 class QuestionIndexViewTests(TestCase):
+
+    def setUp(self):
+        User = get_user_model()
+        user = User.objects.create_user('temporary', 'temporary@gmail.com', 'temporary')
+
+
     def test_no_questions(self):
         """
         If no questions exist, an appropriate message is displayed.
         """
+        User = get_user_model()
+        self.client.login(username='temporary', password='temporary')
         response = self.client.get(reverse('polls:polls'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No polls are available.")
         self.assertQuerysetEqual(response.context['latest_question_list'], [])
+
+    def test_no_nologin_questions(self):
+        """
+        If no questions exist, an appropriate message is displayed.
+        """
+        response = self.client.get(reverse('polls:polls'))
+        #print(response)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, "/login/?next=/polling/polls/")
+
 
     def test_past_question(self):
         """
         Questions with a pub_date in the past are displayed on the
         index page.
         """
+        User = get_user_model()
+        self.client.login(username='temporary', password='temporary')
         create_question(question_text="Past question.", days=-30)
         response = self.client.get(reverse('polls:polls'))
         self.assertQuerysetEqual(
@@ -73,6 +96,8 @@ class QuestionIndexViewTests(TestCase):
         Questions with a pub_date in the future aren't displayed on
         the index page.
         """
+        User = get_user_model()
+        self.client.login(username='temporary', password='temporary')
         create_question(question_text="Future question.", days=30)
         response = self.client.get(reverse('polls:polls'))
         self.assertContains(response, "No polls are available.")
@@ -83,6 +108,8 @@ class QuestionIndexViewTests(TestCase):
         Even if both past and future questions exist, only past questions
         are displayed.
         """
+        User = get_user_model()
+        self.client.login(username='temporary', password='temporary')
         create_question(question_text="Past question.", days=-30)
         create_question(question_text="Future question.", days=30)
         response = self.client.get(reverse('polls:polls'))
@@ -95,6 +122,8 @@ class QuestionIndexViewTests(TestCase):
         """
         The questions index page may display multiple questions.
         """
+        User = get_user_model()
+        self.client.login(username='temporary', password='temporary')
         create_question(question_text="Past question 1.", days=-30)
         create_question(question_text="Past question 2.", days=-5)
         response = self.client.get(reverse('polls:polls'))
@@ -105,11 +134,18 @@ class QuestionIndexViewTests(TestCase):
 
 class QuestionDetailViewTests(TestCase):
 
+    def setUp(self):
+        User = get_user_model()
+        user = User.objects.create_user('temporary', 'temporary@gmail.com', 'temporary')
+
+
     def test_past_question(self):
         """
         The detail view of a question with a pub_date in the past
         displays the question's text.
         """
+        User = get_user_model()
+        self.client.login(username='temporary', password='temporary')
         past_question = create_question(question_text='Past Question.', days=-5)
         url = reverse('polls:detail', args=(past_question.id,))
         response = self.client.get(url)
@@ -120,6 +156,8 @@ class QuestionDetailViewTests(TestCase):
         The detail view of a question with a pub_date in the future
         returns a 404 not found.
         """
+        User = get_user_model()
+        self.client.login(username='temporary', password='temporary')
         future_question = create_question(question_text='Future question.', days=5)
         url = reverse('polls:detail', args=(future_question.id,))
         response = self.client.get(url)
